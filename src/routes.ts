@@ -11,6 +11,7 @@ router.post("/criarNovaTurma", auth, turmacontroller.criaTurma)
 
 router.post("/criarMateria", auth, turmacontroller.checkAdminAccess, turmacontroller.addMateria)
 
+router.post("/deveres", auth, turmacontroller.checkUserAccess, turmacontroller.getDeveres)
 router.post("/criarDever", auth, turmacontroller.checkAdminAccess, turmacontroller.addDever)
 router.put("/editDever", auth, turmacontroller.checkAdminAccess, turmacontroller.editDever)
 

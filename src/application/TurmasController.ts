@@ -18,6 +18,22 @@ class TurmasController {
         next()
     }
 
+    public async checkUserAccess(req:Request, res:Response, next:NextFunction){
+        if(!req.body.turmas && !req.body.turmaID){
+            return res.status(400).send("Bad Request")
+        }
+        var turmas = req.body.turmas ?? [req.body.turmaId]
+
+        for (const turma of turmas){
+            let result = await connection.query("SELECT * FROM usuarioParticipaTurma WHERE idUsuario=? AND idTurma=?", [req.body.userData.id, turma])as RowDataPacket[]
+
+            if(result[0].length==0){
+                return res.status(403).send("Sem acesso a turma: "+turma)
+            }
+        }
+        next()
+    }
+
     //GET()
     public async getTurmas(req:Request, res:Response){
         let results = await connection.query(
@@ -67,7 +83,12 @@ class TurmasController {
     public async adicionaAdmin(req:Request, res:Response){}
     public async removeAdmin(req:Request, res:Response){}
 
-    public async getDeveres(req:Request, res:Response){}
+    public async getDeveres(req:Request, res:Response){
+        let body = req.body
+
+        var result = await connection.query("SELECT d.id, d.nome, d.pontos, d.dataHora, d.idMateria FROM dever d INNER JOIN materia m ON d.idMateria=m.id WHERE m.turmaID IN (?)", [body.turmas])
+        res.send(result[0])
+    }
 
     //POST(titulo, materiaId, pontos, dataHora)
     public async addDever(req:Request, res:Response){
@@ -80,7 +101,7 @@ class TurmasController {
         res.send("OK")
     }
 
-    //PUT()
+    //PUT(deverId, nome?, pontos?, dataHora?. idMateria?, deverId?)
     public async editDever(req:Request, res:Response){
         let body = req.body
         if (body.length==0) return res.status(400).send("Bad request")
