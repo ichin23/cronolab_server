@@ -8,8 +8,11 @@ const router: Router = Router()
 router.get("/getTurmas", auth, turmacontroller.getTurmas)
 router.post("/enterTurma", auth, turmacontroller.enterTurma)
 router.post("/criarNovaTurma", auth, turmacontroller.criaTurma)
+
 router.post("/criarMateria", auth, turmacontroller.checkAdminAccess, turmacontroller.addMateria)
 
+router.post("/criarDever", auth, turmacontroller.checkAdminAccess, turmacontroller.addDever)
+router.put("/editDever", auth, turmacontroller.checkAdminAccess, turmacontroller.editDever)
 
 router.put("/createUser", usercontroller.createUser)
 router.post("/login", usercontroller.login)

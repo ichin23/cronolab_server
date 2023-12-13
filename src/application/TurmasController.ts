@@ -4,14 +4,19 @@ import { NextFunction, Request, Response } from "express";
 
 class TurmasController {
     public async checkAdminAccess(req:Request, res:Response, next:NextFunction){
-        let result = await connection.query("SELECT * FROM usuarioGerenciaTurma WHERE idUsuario=? AND idTurma=?",[req.body.userData.id, req.body.turmaId]) as RowDataPacket[]
+        if(!req.body.turmaId && !req.body.materiaId){
+            return res.status(400).send("Passe o turmaId ou materiaId")
+        }
+
+        let query = req.body.turmaId ? "SELECT * FROM usuarioGerenciaTurma WHERE idUsuario=? AND idTurma=?" : "SELECT idTurma, idUsuario FROM usuarioGerenciaTurma g INNER JOIN materia m ON m.turmaID=g.idTurma WHERE g.idUsuario=? AND m.id=?"
+        let param= req.body.turmaId ?? req.body.materiaId
+        let result = await connection.query(query,[req.body.userData.id, param]) as RowDataPacket[]
         console.log(result[0])
         if(result[0].length==0){
             return res.status(403).send("Sem acesso a modificação da turma")
         }
         next()
     }
-
 
     //GET()
     public async getTurmas(req:Request, res:Response){
@@ -63,19 +68,43 @@ class TurmasController {
     public async removeAdmin(req:Request, res:Response){}
 
     public async getDeveres(req:Request, res:Response){}
+
     //POST(titulo, materiaId, pontos, dataHora)
     public async addDever(req:Request, res:Response){
         let body = req.body
         if(!body.titulo || !body.pontos || !body.dataHora || !body.materiaId){
             return res.status(400).send("Missing Params: (titulo, pontos, dataHora, materiaId)")
         }
-        await connection.query("INSER INTO dever(titulo, pontos, dataHora, idMateria) VALUES (?,?,?,?)",
+        await connection.query("INSERT INTO dever(nome, pontos, dataHora, idMateria) VALUES (?,?,?,?)",
          [body.titulo, body.pontos, body.dataHora, body.materiaId])
         res.send("OK")
     }
+
     //PUT()
-    public async editDever(req:Request, res:Response){}
-    public async deleteDever(req:Request, res:Response){}
+    public async editDever(req:Request, res:Response){
+        let body = req.body
+        if (body.length==0) return res.status(400).send("Bad request")
+
+        let dever = await connection.query("SELECT * FROM dever WHERE id=?", [body.deverId]) as RowDataPacket
+        let deverData =dever[0][0]
+        var final = [
+             req.body.nome ?? deverData.nome,
+             req.body.pontos ?? deverData.pontos,
+             req.body.dataHora ?? deverData.dataHora,
+             req.body.idMateria ?? deverData.idMateria,
+             req.body.deverId
+        ]
+
+        await connection.query("UPDATE dever SET nome=?, pontos=?, dataHora=?, idMateria=? WHERE id=?", final),
+        res.send("OK")
+
+    }
+    //DELETE(idDever)
+    public async deleteDever(req:Request, res:Response){
+        if(!req.params.id) return res.status(400).send("Bad Request")
+        await connection.query("DELETE FROM dever WHERE id=?",[req.params.id])
+        res.send("OK")
+    }
     
     //POST(nome, professor, contato, turmaId)
     public async addMateria(req:Request, res:Response){
@@ -88,8 +117,28 @@ class TurmasController {
          [body.nome, body.professor, body.contato, body.turmaId])
         res.send("OK")
     }
-    public async editMateria(req:Request, res:Response){}
-    public async deleteMateria(req:Request, res:Response){}
+
+    public async editMateria(req:Request, res:Response){
+        let body = req.body
+        if (body.length>=1) return res.status(400).send("Bad request")
+        
+        let materia = (await connection.query("SELECT * FROM materia WHERE id=?",[body.idMateria]) as RowDataPacket)[0][0]
+        var final =[
+            body.nome ?? materia.nome, 
+            body.professor ?? materia.professor,
+            body.contato ?? materia.contato,
+            body.idMateria ?? materia.idMateria
+        ]
+
+        await connection.query("UPDATE materia SET nome=?, professor=?, contato=? WHERE id=?", final)
+        res.send("OK")
+        
+    }
+    public async deleteMateria(req:Request, res:Response){
+        await connection.query("DELETE FROM dever WHERE idMateria=?",[req.params.id])
+        await connection.query("DELETE FROM materia WHERE id=?",[req.params.id])
+        res.send("OK")
+    }
 }
 
 export const turmacontroller = new TurmasController()
