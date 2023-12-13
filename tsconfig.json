@@ -1,0 +1,17 @@
+{
+    "compilerOptions": {
+      "target": "es5",                          
+      "module": "NodeNext",                    
+      "moduleResolution": "node",
+      "baseUrl": "src",
+      "outDir": "build",                          
+      "sourceMap": true,
+      "noImplicitAny": true,
+      "lib": ["es6"],                     
+      "allowJs": true,
+      "rootDir": "src",
+      "strict": true,         
+      "esModuleInterop": true,
+      "resolveJsonModule": true
+    }
+  }
