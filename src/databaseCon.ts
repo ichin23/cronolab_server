@@ -14,6 +14,4 @@ const connection: Pool =  createPool({
     database: process.env.MYSQL_DATABASE
 })
 
-
-
 export {connection}

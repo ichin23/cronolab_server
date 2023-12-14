@@ -13,6 +13,8 @@ CREATE TABLE turma(
     nome VARCHAR(50),
     senha VARCHAR(20)
 );
+ALTER TABLE turma ADD COLUMN presidente INT;
+ALTER TABLE turma ADD foreign key(presidente) REFERENCES usuario(id);
 
 CREATE TABLE usuarioParticipaTurma(
 	idUsuario INT NOT NULL,
@@ -56,3 +58,6 @@ CREATE TABLE usuarioDever(
     FOREIGN KEY(idDever) REFERENCES dever(id),
     PRIMARY KEY(idUsuario, idDever)
 );
+
+ALTER TABLE turma
+MODIFY id VARCHAR(6);

@@ -1,4 +1,4 @@
-import { RowDataPacket } from "mysql2";
+import { QueryError, RowDataPacket } from "mysql2";
 import { connection } from "../databaseCon";
 import { NextFunction, Request, Response } from "express";
 
@@ -19,7 +19,7 @@ class TurmasController {
     }
 
     public async checkUserAccess(req:Request, res:Response, next:NextFunction){
-        if(!req.body.turmas && !req.body.turmaID){
+        if(!req.body.turmas && !req.body.turmaId){
             return res.status(400).send("Bad Request")
         }
         var turmas = req.body.turmas ?? [req.body.turmaId]
@@ -77,11 +77,51 @@ class TurmasController {
         }
     }
 
-    
-    public async sairTurma(req:Request, res:Response){}
+    //DELETE(turmaId)
+    public async sairTurma(req:Request, res:Response){
+        try{
+            await connection.query("START TRANSACTION")
+            let presidente =(await connection.query("SELECT presidente FROM turma WHERE id=?", [req.body.turmaId]) as RowDataPacket[])[0][0]["presidente"]
+            if(presidente===req.body.userData.id){
+                await connection.query(
+                    "UPDATE turma SET presidente=(SELECT DISTINCT idUsuario FROM usuarioGerenciaTurma WHERE idTurma=? AND idUsuario != ? LIMIT 1) WHERE id= ?",
+                    [req.body.turmaId, req.body.userData.id, req.body.turmaId]
+                )
+            }
+            await connection.query("DELETE u from usuarioDever u INNER JOIN dever d ON d.id=idDever INNER JOIN materia m ON m.id=d.idMateria WHERE m.turmaID=? AND idUsuario=?", [req.body.turmaId, req.body.userData.id ])
+            await connection.query("DELETE FROM usuarioParticipaTurma WHERE idUsuario=? AND idTurma=?",[req.body.userData.id, req.body.turmaId])
+            await connection.query("DELETE FROM usuarioGerenciaTurma WHERE idUsuario=? AND idTurma=?",[req.body.userData.id, req.body.turmaId])
+            await connection.query("COMMIT")
+            res.send("OK")
+        }catch(e:any){
+            await connection.query("ROLLBACK")
+            if(e.errno===1048){
+                return res.status(405).send("Você é o único administrador.")
+            }
+            
+            res.status(500).send("Ocorreu um erro")
+        }
+    }
     public async deleteTurma(req:Request, res:Response){}
-    public async adicionaAdmin(req:Request, res:Response){}
-    public async removeAdmin(req:Request, res:Response){}
+
+    //POST(userId, turmaId)
+    public async addAdmin(req:Request, res:Response){
+        let body = req.body
+        if(!body.userId || !body.turmaId) return res.send(400).send({message: "Passe um id de usuário",code:101})
+
+        await connection.query("INSERT INTO usuarioGerenciaTurma(idUsuario, idTurma) VALUES (?,?)",[body.userId, body.turmaId])
+        return res.send("OK")
+        
+    }
+    //DELETE(userId, turmaId)
+    public async removeAdmin(req:Request, res:Response){
+        let body=req.body
+        let presidente = await connection.query("SELECT presidente FROM turma WHERE id=?",[body.turmaId])
+        if(body.userId==presidente) return res.status(405).send({message: "Can't remove president", code: 102})
+
+        await connection.query("DELETE FROM usuarioGerenciaTurma WHERE idUsuario=?",[body.userId])
+        res.send("OK")
+    }
 
     public async getDeveres(req:Request, res:Response){
         let body = req.body
