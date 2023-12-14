@@ -7,6 +7,7 @@ import { RowDataPacket } from "mysql2";
 class UserController{
     public async createUser(req:Request, res:Response){
         const body = req.body
+       
         if(!body.email || !body.password || !body.name){
             res.status(400).send({"error": "You need to pass email, password and name'"})
             return;
@@ -32,7 +33,7 @@ class UserController{
             return
         }
         const isMatching = await bcrypt.compare(body.password, result[0][0].senha)
-        console.log(result)
+        
         if(isMatching){
             let token= jwt.sign({
                 "id":  result[0][0].id

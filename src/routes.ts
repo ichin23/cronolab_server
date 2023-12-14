@@ -20,7 +20,7 @@ router.post("/dever", auth, turmacontroller.checkAdminAccess, turmacontroller.ad
 router.put("/editDever", auth, turmacontroller.checkAdminAccess, turmacontroller.editDever)
 router.delete("/dever", auth,turmacontroller.checkAdminAccess, turmacontroller.deleteDever)
 
-router.put("/createUser", usercontroller.createUser)
+router.post("/createUser", usercontroller.createUser)
 router.post("/login", usercontroller.login)
 
 export {router}
