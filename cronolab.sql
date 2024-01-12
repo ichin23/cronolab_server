@@ -61,3 +61,14 @@ CREATE TABLE usuarioDever(
 
 ALTER TABLE turma
 MODIFY id VARCHAR(6);
+
+DELIMITER //
+CREATE FUNCTION getTurmadoDever(idDever int) RETURNS int reads sql data
+BEGIN
+	DECLARE result INT;	
+    
+	SELECT t.id FROM turma t INNER JOIN materia m ON m.turmaID=t.id INNER JOIN dever d ON d.idMateria=m.id WHERE d.id=idDever INTO result;
+    return result;
+END
+//
+delimiter ;

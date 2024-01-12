@@ -1,6 +1,7 @@
 
 import express from "express";
 import { router } from "./routes";
+var morgan = require('morgan')
 
 export class App{
     public server: express.Application;
@@ -13,6 +14,8 @@ export class App{
 
     private setConfigs(){
         this.server.use(express.json())
+        this.server.use(morgan('dev'))
+        
     }
 
     private loadRoutes(){

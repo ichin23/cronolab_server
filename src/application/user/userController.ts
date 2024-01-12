@@ -26,7 +26,7 @@ class UserController{
             return;
         }
 
-        let result = await connection.query("SELECT id, email, senha FROM usuario WHERE email=? LIMIT 1", [body.email]) as RowDataPacket[]
+        let result = await connection.query("SELECT id, email, nome, senha FROM usuario WHERE email=? LIMIT 1", [body.email]) as RowDataPacket[]
         
         if (result.length==0){
             res.status(400).send("dados inválidos")
@@ -35,15 +35,19 @@ class UserController{
         const isMatching = await bcrypt.compare(body.password, result[0][0].senha)
         
         if(isMatching){
-            let token= jwt.sign({
+            
+            let token = jwt.sign({
                 "id":  result[0][0].id
             }, process.env.JWT_SECRET as jwt.Secret, {
-                noTimestamp: true,
                 expiresIn: "24h"
             })
+            console.log(token)
             return res.status(200).send({
-                accessToken:token,
-                userId: result[0][0].id
+                accessToken: token,
+                userId: result[0][0].id,
+                nome: result[0][0].nome,
+                email: result[0][0].email
+
             })
             
         }
