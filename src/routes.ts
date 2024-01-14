@@ -16,13 +16,13 @@ router.post("/getParticipantes", auth, turmacontroller.checkUserAccess, turmacon
 
 router.post("/getMaterias", auth, turmacontroller.checkUserAccess, turmacontroller.getMaterias)
 router.post("/materia", auth, turmacontroller.checkAdminAccess, turmacontroller.addMateria)
-router.post("/editMateria", auth, turmacontroller.checkAdminAccess, turmacontroller.editMateria)
 router.delete("/materia", auth, turmacontroller.checkAdminAccess, turmacontroller.deleteMateria)
+router.post("/editMateria", auth, turmacontroller.checkAdminAccess, turmacontroller.editMateria)
 
 router.post("/deveres", auth, turmacontroller.checkUserAccess, turmacontroller.getDeveres)
 router.post("/dever", auth, turmacontroller.checkAdminAccess, turmacontroller.addDever)
-router.put("/editDever", auth, turmacontroller.checkAdminAccess, turmacontroller.editDever)
 router.delete("/dever", auth,turmacontroller.checkAdminAccess, turmacontroller.deleteDever)
+router.put("/editDever", auth, turmacontroller.checkAdminAccess, turmacontroller.editDever)
 router.put("/statusDever", auth, turmacontroller.checkUserAccess, turmacontroller.alterarStatusDever)
 
 router.post("/createUser", usercontroller.createUser)

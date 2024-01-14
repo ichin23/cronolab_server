@@ -158,7 +158,7 @@ class TurmasController {
     
 
     public async getParticipantes(req:Request, res:Response){
-        let body=req.params
+        let body=req.body
         let users = await connection.query("SELECT id, nome, COUNT(g.idUsuario) admin FROM usuario u INNER JOIN usuarioParticipaTurma p ON u.id=p.idUsuario LEFT JOIN usuarioGerenciaTurma g ON g.idUsuario=u.id WHERE p.idTurma=? GROUP BY g.idUsuario, id",[body.turmaId])
         res.send(users[0])
     }
@@ -190,7 +190,7 @@ class TurmasController {
         let dever = await connection.query("SELECT * FROM dever WHERE id=?", [body.deverId]) as RowDataPacket
         let deverData =dever[0][0]
         var final = [
-             req.body.nome ?? deverData.nome,
+             req.body.titulo ?? deverData.titulo,
              req.body.pontos ?? deverData.pontos,
              req.body.dataHora ?? deverData.dataHora,
              req.body.idMateria ?? deverData.idMateria,
@@ -220,8 +220,8 @@ class TurmasController {
 
     //DELETE(idDever)
     public async deleteDever(req:Request, res:Response){
-        if(!req.params.id) return res.status(400).send("Bad Request")
-        await connection.query("DELETE FROM dever WHERE id=?",[req.params.id])
+        if(!req.query.id) return res.status(400).send("Bad Request")
+        await connection.query("DELETE FROM dever WHERE id=?",[req.query.id])
         res.send("OK")
     }
 
