@@ -4,13 +4,16 @@ import { NextFunction, Request, Response } from "express";
 
 class TurmasController {
     public async checkAdminAccess(req:Request, res:Response, next:NextFunction){
-        if(!req.body.turmaId && !req.body.materiaId && !req.query.materiaId){
+        if(!req.body.turmaId && !req.body.materiaId && !req.query.materiaId && !req.query.deverId){
             return res.status(400).send("Passe o turmaId ou materiaId")
         }
 
-        let query = req.body.turmaId ? "SELECT * FROM usuarioGerenciaTurma WHERE idUsuario=? AND idTurma=?" : "SELECT idTurma, idUsuario FROM usuarioGerenciaTurma g INNER JOIN materia m ON m.turmaID=g.idTurma WHERE g.idUsuario=? AND m.id=?"
-        let param= req.body.turmaId ?? req.body.materiaId ?? req.query.materiaId
+        let query = req.body.turmaId ? "SELECT * FROM usuarioGerenciaTurma WHERE idUsuario=? AND idTurma=?" : (req.body.materiaId || req.query.materiaId)? "SELECT idTurma, idUsuario FROM usuarioGerenciaTurma g INNER JOIN materia m ON m.turmaID=g.idTurma WHERE g.idUsuario=? AND m.id=?" : "SELECT idTurma, idUsuario FROM usuarioGerenciaTurma g INNER JOIN materia m ON m.turmaID=g.idTurma INNER JOIN dever d ON d.idMateria=m.id WHERE g.idUsuario=? AND d.id=?"
+        let param= req.body.turmaId ?? req.body.materiaId ?? req.query.materiaId ?? req.query.deverId
+        console.log(query)
+        console.log(param)
         let result = await connection.query(query,[req.body.userData.id, param]) as RowDataPacket[]
+        console.log(result)
         if(result[0].length==0){
             return res.status(403).send("Sem acesso a modificação da turma")
         }
@@ -220,8 +223,8 @@ class TurmasController {
 
     //DELETE(idDever)
     public async deleteDever(req:Request, res:Response){
-        if(!req.query.id) return res.status(400).send("Bad Request")
-        await connection.query("DELETE FROM dever WHERE id=?",[req.query.id])
+        if(!req.query.deverId) return res.status(400).send("Bad Request")
+        await connection.query("DELETE FROM dever WHERE id=?",[req.query.deverId])
         res.send("OK")
     }
 

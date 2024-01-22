@@ -42,7 +42,7 @@
 - ## Turmas do usuário
     - `tipo: GET`
     - `url:` /getTurmas
-     - `200 - resposta:`
+    - `200 - resposta:`
         ```json
         [
             {
@@ -65,7 +65,7 @@
             "turmaId": int
         }
         ```
-     - `200 - resposta:` OK
+    - `200 - resposta:` OK
         
 
 - ## Criar nova turma
@@ -78,7 +78,7 @@
             "nome": string
         }
         ```
-         - `200 - resposta:` OK
+    - `200 - resposta:` OK
 
 - ## Sair da turma
     - `tipo: DELETE`
@@ -89,7 +89,7 @@
             "turmaId": int
         }
         ```
-     - `200 - resposta:` OK
+    - `200 - resposta:` OK
 
 - ## Adicionar admin
     - `tipo: POST`
@@ -101,7 +101,7 @@
             "userId": int
         }
         ```
-     - `200 - resposta:` OK
+    - `200 - resposta:` OK
 
 - ## Participantes da turma
     - `tipo: POST`
@@ -112,7 +112,7 @@
             "turmas": list<int>
         }
         ```
-     - `200 - resposta:`
+    - `200 - resposta:`
         ```json
         [
             {
@@ -139,7 +139,7 @@
             "turmas": list<int>
         }
         ```
-     - `200 - resposta:`
+    - `200 - resposta:`
         ```json
         [
             {
@@ -165,16 +165,16 @@
             "turmaId": int
         }
         ```
-     - `200 - resposta:` OK
+    - `200 - resposta:` OK
 
-- # Apaga Materia
+- ## Apaga Materia
     - `tipo: DELETE`
     - `url:` /materia
     - `query:` 
         ```json
         "materiaId": int
         ```
-     - `200 - resposta:` OK
+    - `200 - resposta:` OK
 
 
 - ## Editar Materia
@@ -190,7 +190,7 @@
             "turmaId": int,
         }
         ```
-     - `200 - resposta:` OK
+    - `200 - resposta:` OK
 
 - ## Deveres das turma
     - `tipo: POST`
@@ -201,7 +201,7 @@
             "turmas": list<int>
         }
         ```
-     - `200 - resposta:`
+    - `200 - resposta:`
         ```json
         [
             {
@@ -227,7 +227,7 @@
             "materiaId": int,
         }
         ```
-     - `200 - resposta:` OK
+    - `200 - resposta:` OK
 
 - ## Apagar dever
     - `tipo: DELETE`
@@ -235,10 +235,10 @@
     - `query:` 
         ```json
         {
-            "id": int
-        }
+            "deverId": int
+        } 
         ```
-     - `200 - resposta:` OK
+    - `200 - resposta:` OK
 
 - ## Status do dever
     - `tipo: PUT`
@@ -250,7 +250,7 @@
             "status": bool
         }
         ```
-     - `200 - resposta:`
+    - `200 - resposta:`
         ```json
        {"mes": "OK"}
         ```
