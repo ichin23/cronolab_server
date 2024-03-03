@@ -8,13 +8,13 @@ class UserController{
     public async createUser(req:Request, res:Response){
         const body = req.body
        
-        if(!body.email || !body.password || !body.name){
+        if(!body.email || !body.password || !body.nome){
             res.status(400).send({"error": "You need to pass email, password and name'"})
             return;
         }
         var passHash = await bcrypt.hash(req.body.password, 10)
         
-        let result = await connection.query("INSERT INTO usuario(nome, email, senha) VALUES (?,?,?)", [body.name, body.email, passHash])
+        let result = await connection.query("INSERT INTO usuario(nome, email, senha) VALUES (?,?,?)", [body.nome, body.email, passHash])
         res.sendStatus(200)
        
     }
@@ -28,7 +28,7 @@ class UserController{
 
         let result = await connection.query("SELECT id, email, nome, senha FROM usuario WHERE email=? LIMIT 1", [body.email]) as RowDataPacket[]
         
-        if (result.length==0){
+        if (result[0].length==0){
             res.status(400).send("dados inválidos")
             return
         }

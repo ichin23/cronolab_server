@@ -9,7 +9,7 @@ CREATE TABLE usuario(
 );
 
 CREATE TABLE turma(
-	id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+	id VARCHAR(15) NOT NULL PRIMARY KEY,
     nome VARCHAR(50),
     senha VARCHAR(20)
 );
@@ -18,7 +18,7 @@ ALTER TABLE turma ADD foreign key(presidente) REFERENCES usuario(id);
 
 CREATE TABLE usuarioParticipaTurma(
 	idUsuario INT NOT NULL,
-    idTurma INT NOT NULL,
+    idTurma VARCHAR(15) NOT NULL,
     FOREIGN KEY(idUsuario) REFERENCES usuario(id),
     FOREIGN KEY(idTurma) REFERENCES turma(id),
     PRIMARY KEY(idUsuario, idTurma)
@@ -26,7 +26,7 @@ CREATE TABLE usuarioParticipaTurma(
 
 CREATE TABLE usuarioGerenciaTurma(
 	idUsuario INT NOT NULL,
-    idTurma INT NOT NULL,
+    idTurma VARCHAR(15) NOT NULL,
     FOREIGN KEY(idUsuario) REFERENCES usuario(id),
     FOREIGN KEY(idTurma) REFERENCES turma(id),
     PRIMARY KEY(idUsuario, idTurma)
@@ -37,7 +37,7 @@ CREATE TABLE materia(
 	nome VARCHAR(50),
     professor VARCHAR(50),
     contato VARCHAR(100),
-    turmaID INT NOT NULL,
+    turmaID VARCHAR(15) NOT NULL,
     FOREIGN KEY (turmaID) REFERENCES turma(id)
 );
 
@@ -50,6 +50,9 @@ CREATE TABLE dever(
     FOREIGN KEY(idMateria) REFERENCES materia(id)
 );
 
+ALTER TABLE dever ADD COLUMN local VARCHAR(20);
+ALTER TABLE dever ADD COLUMN nota VARCHAR(100);
+
 CREATE TABLE usuarioDever(
 	idUsuario INT NOT NULL,
     idDever INT NOT NULL,
@@ -59,8 +62,7 @@ CREATE TABLE usuarioDever(
     PRIMARY KEY(idUsuario, idDever)
 );
 
-ALTER TABLE turma
-MODIFY id VARCHAR(6);
+
 
 DELIMITER //
 CREATE FUNCTION getTurmadoDever(idDever int) RETURNS int reads sql data

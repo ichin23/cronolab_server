@@ -59,7 +59,7 @@ class TurmasController {
         }
         var materias = await connection.query("SELECT * FROM materia WHERE turmaId IN (?)", [turmasIds])
       
-        var deveres = await connection.query("SELECT d.id, d.nome, d.pontos, d.dataHora, d.idMateria, COUNT(uD.idUsuario) concluiu FROM dever d INNER JOIN materia m ON d.idMateria=m.id LEFT JOIN usuarioDever uD ON d.id = uD.idDever AND uD.idUsuario=1 WHERE m.turmaID IN (?) AND dataHora>NOW() GROUP BY uD.idUsuario, d.id ORDER BY concluiu, dataHora", [turmasIds])
+        var deveres = await connection.query("SELECT d.id, d.nome, d.pontos, d.dataHora, d.idMateria, d.local, d.descricao, COUNT(uD.idUsuario) concluiu FROM dever d INNER JOIN materia m ON d.idMateria=m.id LEFT JOIN usuarioDever uD ON d.id = uD.idDever AND uD.idUsuario=1 WHERE m.turmaID IN (?) AND dataHora>NOW() GROUP BY uD.idUsuario, d.id ORDER BY concluiu, dataHora", [turmasIds])
         
 
         res.send({
@@ -84,8 +84,9 @@ class TurmasController {
             return res.status(400).send("Missing turmaId")
         }
         let queryTurma = await connection.query("SELECT nome FROM turma WHERE id=?", [req.body.turmaId]) as RowDataPacket[]
+       
         if(queryTurma[0].length<=0){
-            res.status(404).send("Turma não encontrada")
+            return res.status(404).send("Turma não encontrada")
         }
         await connection.query("INSERT INTO usuarioParticipaTurma(idUsuario, idTurma) VALUES (?,?)", [req.body.userData.id, req.body.turmaId])
         res.send("OK")
@@ -131,6 +132,12 @@ class TurmasController {
         }catch(e:any){
             await connection.query("ROLLBACK")
             if(e.errno===1048){
+                if(req.body.force===true){
+                    await connection.query("DELETE u from usuarioDever u INNER JOIN dever d ON d.id=idDever INNER JOIN materia m ON m.id=d.idMateria WHERE m.turmaID=? AND idUsuario=?", [req.body.turmaId, req.body.userData.id ])
+                    await connection.query("DELETE FROM usuarioParticipaTurma WHERE idUsuario=? AND idTurma=?",[req.body.userData.id, req.body.turmaId])
+                    await connection.query("DELETE FROM usuarioGerenciaTurma WHERE idUsuario=? AND idTurma=?",[req.body.userData.id, req.body.turmaId])
+                    return res.send({res: "OK"})
+                }
                 return res.status(405).send("Você é o único administrador.")
             }
             
@@ -169,7 +176,7 @@ class TurmasController {
     public async getDeveres(req:Request, res:Response){
         let body = req.body
 
-        var result = await connection.query("SELECT d.id, d.nome, d.pontos, d.dataHora, d.idMateria FROM dever d INNER JOIN materia m ON d.idMateria=m.id WHERE m.turmaID IN (?) AND dataHora>CURDATE()", [body.turmas])
+        var result = await connection.query("SELECT * FROM dever d INNER JOIN materia m ON d.idMateria=m.id WHERE m.turmaID IN (?) AND dataHora>CURDATE()", [body.turmas])
         console.log(result[0])
         res.send(result[0])
     }
@@ -177,11 +184,16 @@ class TurmasController {
     //POST(titulo, materiaId, pontos, dataHora)
     public async addDever(req:Request, res:Response){
         let body = req.body
-        if(!body.titulo || !body.pontos || !body.dataHora || !body.materiaId){
+        console.log(body)
+        console.log(!body.titulo)
+        console.log(!body.pontos)
+        console.log(!body.dataHora)
+        console.log(!body.materiaId)
+        if(!body.titulo || body.pontos==undefined || !body.dataHora || !body.materiaId){
             return res.status(400).send("Missing Params: (titulo, pontos, dataHora, materiaId)")
         }
-        await connection.query("INSERT INTO dever(nome, pontos, dataHora, idMateria) VALUES (?,?,?,?)",
-         [body.titulo, body.pontos, body.dataHora, body.materiaId])
+        await connection.query("INSERT INTO dever(nome, pontos, dataHora, idMateria, local, descricao) VALUES (?,?,?,?,?,?)",
+         [body.titulo, body.pontos, body.dataHora, body.materiaId, body.local, body.descricao])
         res.send("OK")
     }
 
@@ -197,10 +209,11 @@ class TurmasController {
              req.body.pontos ?? deverData.pontos,
              req.body.dataHora ?? deverData.dataHora,
              req.body.idMateria ?? deverData.idMateria,
+             req.body.descricao ?? deverData.descricao,
              req.body.deverId
         ]
 
-        await connection.query("UPDATE dever SET nome=?, pontos=?, dataHora=?, idMateria=? WHERE id=?", final),
+        await connection.query("UPDATE dever SET nome=?, pontos=?, dataHora=?, idMateria=?, descricao=? WHERE id=?", final),
         res.send("OK")
     }
 
