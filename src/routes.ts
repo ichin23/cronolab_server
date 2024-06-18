@@ -5,6 +5,8 @@ import { usercontroller } from "./application/user/userController";
 const auth = require("./application/auth/auth")
 const router: Router = Router()
 
+
+
 router.get("/getData", auth, turmacontroller.getData)
 
 router.get("/getTurmas", auth, turmacontroller.getTurmas)

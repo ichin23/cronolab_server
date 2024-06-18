@@ -4,7 +4,8 @@ import { Request, Response, NextFunction } from "express"
 module.exports= (req:Request, res: Response, next:NextFunction)=>{
     try{
         const token = req.headers.authorization?.replace("Bearer ", "")
-        console.log(token)
+        console.log(req.hostname)
+        console.log(req.originalUrl)
         if (token===undefined){
             console.log("Sem token")
             return res.status(403).send({

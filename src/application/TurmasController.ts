@@ -59,7 +59,7 @@ class TurmasController {
         }
         var materias = await connection.query("SELECT * FROM materia WHERE turmaId IN (?)", [turmasIds])
       
-        var deveres = await connection.query("SELECT d.id, d.nome, d.pontos, d.dataHora, d.idMateria, d.local, d.descricao, COUNT(uD.idUsuario) concluiu FROM dever d INNER JOIN materia m ON d.idMateria=m.id LEFT JOIN usuarioDever uD ON d.id = uD.idDever AND uD.idUsuario=1 WHERE m.turmaID IN (?) AND dataHora>NOW() GROUP BY uD.idUsuario, d.id ORDER BY concluiu, dataHora", [turmasIds])
+        var deveres = await connection.query("SELECT d.id, d.nome, d.pontos, d.dataHora, d.idMateria, d.local, d.nota, COUNT(uD.idUsuario) concluiu FROM dever d INNER JOIN materia m ON d.idMateria=m.id LEFT JOIN usuarioDever uD ON d.id = uD.idDever AND uD.idUsuario=1 WHERE m.turmaID IN (?) AND dataHora>NOW() GROUP BY uD.idUsuario, d.id ORDER BY concluiu, dataHora", [turmasIds])
         
 
         res.send({
@@ -192,8 +192,8 @@ class TurmasController {
         if(!body.titulo || body.pontos==undefined || !body.dataHora || !body.materiaId){
             return res.status(400).send("Missing Params: (titulo, pontos, dataHora, materiaId)")
         }
-        await connection.query("INSERT INTO dever(nome, pontos, dataHora, idMateria, local, descricao) VALUES (?,?,?,?,?,?)",
-         [body.titulo, body.pontos, body.dataHora, body.materiaId, body.local, body.descricao])
+        await connection.query("INSERT INTO dever(nome, pontos, dataHora, idMateria, local, nota) VALUES (?,?,?,?,?,?)",
+         [body.titulo, body.pontos, body.dataHora, body.materiaId, body.local, body.nota])
         res.send("OK")
     }
 
